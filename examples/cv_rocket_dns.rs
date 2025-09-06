@@ -28,27 +28,6 @@ const T1: f64 = 1.0;
 const TINC: f64 = 1.0;
 const NOUT: i32 = 70;
 
-pub struct NVectorWrapper(N_Vector);
-
-impl NVectorWrapper {
-    fn new(len: sunindextype, ctx: SUNContext) -> Self {
-        unsafe { Self(N_VNew_Serial(len, ctx)) }
-    }
-
-    fn as_slice_mut(&mut self) -> &mut [f64] {
-        unsafe {
-            let ptr = N_VGetArrayPointer(self.0);
-            std::slice::from_raw_parts_mut(ptr, 2) // hard-coded 2 for NEQ
-        }
-    }
-}
-
-impl Drop for NVectorWrapper {
-    fn drop(&mut self) {
-        unsafe { N_VDestroy(self.0) }
-    }
-}
-
 extern "C" fn f(t: sunrealtype, y: N_Vector, ydot: N_Vector, user_data: *mut c_void) -> i32 {
     unsafe {
         let engine_on = *(user_data as *mut sunbooleantype);
