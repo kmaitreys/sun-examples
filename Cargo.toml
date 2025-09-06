@@ -1,0 +1,13 @@
+[package]
+name = "sun-examples"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+sundials = { git = "https://github.com/Chris00/rust-sundials.git" }
+sundials-sys = "0.6.2"
+
+[profile.release]
+lto = true        # Link-time optimization
+codegen-units = 1 # Slower build times, but more optimization
+opt-level = 3     # Highest optimization level
