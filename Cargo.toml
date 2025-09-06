@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+libc = "0.2.175"
 sundials = { git = "https://github.com/Chris00/rust-sundials.git" }
 sundials-sys = "0.6.2"
 
