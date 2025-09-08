@@ -1,9 +1,9 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
+use cvode_sys::*;
 use std::ffi::{c_int, c_void};
 use std::ptr;
-use sundials_sys::*;
 
 pub type sunbooleantype = i32;
 pub const SUNTRUE: sunbooleantype = 1;
@@ -133,7 +133,7 @@ unsafe fn print_final_stats(cvode_mem: *mut c_void) {
 fn main() {
     unsafe {
         let mut sunctx: SUNContext = ptr::null_mut();
-        let mut retval = SUNContext_Create(SUN_COMM_NULL, &mut sunctx);
+        let mut retval = SUNContext_Create(SUN_COMM_NULL.try_into().unwrap(), &mut sunctx);
         assert_eq!(retval, 0);
 
         let y = N_VNew_Serial(NEQ, sunctx);
@@ -147,7 +147,7 @@ fn main() {
         *adata.add(0) = ATOL1;
         *adata.add(1) = ATOL2;
 
-        let cvode_mem = CVodeCreate(CV_BDF, sunctx);
+        let cvode_mem = CVodeCreate(CV_BDF.try_into().unwrap(), sunctx);
         CVodeInit(cvode_mem, Some(f), T0, y);
         CVodeSVtolerances(cvode_mem, RTOL, abstol);
 
@@ -170,7 +170,7 @@ fn main() {
         let mut rootsfound: Vec<c_int> = vec![0; numroot as usize];
 
         loop {
-            retval = CVode(cvode_mem, tout, y, &mut t, CV_NORMAL);
+            retval = CVode(cvode_mem, tout, y, &mut t, CV_NORMAL.try_into().unwrap());
             if retval < 0 {
                 break;
             }
@@ -178,7 +178,7 @@ fn main() {
             let ydata = N_VGetArrayPointer(y);
             print_output(t, *ydata.add(0), *ydata.add(1));
 
-            if *engine_on == SUNTRUE && retval == CV_ROOT_RETURN {
+            if *engine_on == SUNTRUE && retval == CV_ROOT_RETURN.try_into().unwrap() {
                 println!("here");
                 CVodeGetRootInfo(cvode_mem, rootsfound.as_mut_ptr());
                 print_root_info(rootsfound[0], rootsfound[1], numroot);
@@ -186,12 +186,12 @@ fn main() {
                 numroot = 1;
                 CVodeRootInit(cvode_mem, 1, Some(g));
                 retval = CVodeReInit(cvode_mem, t, y);
-            } else if *engine_on == SUNFALSE && retval == CV_ROOT_RETURN {
+            } else if *engine_on == SUNFALSE && retval == CV_ROOT_RETURN.try_into().unwrap() {
                 retval = CVodeGetRootInfo(cvode_mem, rootsfound.as_mut_ptr());
                 print_root_info(rootsfound[0], rootsfound[1], numroot);
             }
 
-            if retval == CV_SUCCESS {
+            if retval == CV_SUCCESS.try_into().unwrap() {
                 iout += 1;
                 tout += TINC;
             }
