@@ -4,18 +4,10 @@ version = "0.1.0"
 edition = "2024"
 
 [build-dependencies]
-bindgen = "0.72.1"
 cc = "1.2.36"
-
-[lib]
-name = "cvode_sys"
-path = "src/lib.rs"
 
 
 [profile.release]
 lto = true        # Link-time optimization
 codegen-units = 1 # Slower build times, but more optimization
 opt-level = 3     # Highest optimization level
-
-[dependencies]
-libc = "0.2.175"

@@ -1,40 +1,33 @@
-use std::env;
-use std::path::PathBuf;
-
 fn main() {
-    // Path to the installed Sundials includes and libs - adjust as needed.
-    let include_dir = "/Users/kmaitreys/Documents/software/cvode-7.4.0/install/include";
-    let lib_dir = "/Users/kmaitreys/Documents/software/cvode-7.4.0/install/lib";
+    // Adjust this once if your SUNDIALS install moves
+    let sundials_prefix = "/Users/kmaitreys/Documents/software/cvode-7.4.0/install";
+    let examples_dir = "/Users/kmaitreys/Documents/probe/sun-examples/examples";
 
-    println!("cargo:rerun-if-changed={}", include_dir);
+    // Add all C example files here
+    let sources = ["cv_roberts_dns.c", "cv_diurnal_kry.c"];
 
-    // Link against Sundials libraries used by the example
-    println!("cargo:rustc-link-search=native={}", lib_dir);
+    for src in &sources {
+        println!("cargo:rerun-if-changed={}/{}", examples_dir, src);
+    }
+
+    let mut build = cc::Build::new();
+    for src in &sources {
+        build.file(format!("{}/{}", examples_dir, src));
+    }
+    build
+        .include(format!("{}/include", sundials_prefix))
+        .flag_if_supported("-std=c11")
+        .compile("robertson");
+
+    println!("cargo:rustc-link-search=native={}/lib", sundials_prefix);
+
+    // Required SUNDIALS components
+    println!("cargo:rustc-link-lib=sundials_core");
     println!("cargo:rustc-link-lib=sundials_cvode");
     println!("cargo:rustc-link-lib=sundials_nvecserial");
-    println!("cargo:rustc-link-lib=sundials_nvecmanyvector");
-    println!("cargo:rustc-link-lib=sundials_core");
+    println!("cargo:rustc-link-lib=sundials_sunmatrixdense");
+    println!("cargo:rustc-link-lib=sundials_sunlinsoldense");
 
-    // Configure bindgen
-    let bindings = bindgen::Builder::default()
-        // Use a header that declares the API you want to bind.
-        // Prefer creating a small header `robertson_bind.h` that includes necessary sundials headers
-        .header("wrapper.h")
-        // Tell clang where to find Sundials headers
-        .clang_arg(format!("-I{}", include_dir))
-        // If SUNDIALS uses macros to select real type, define appropriate macros:
-        // .clang_arg("-DSUN_REALTYPE=double") or whichever is required.
-        // .clang_arg("-DSUN_PRECISION=double") // example if needed
-        // Limit the generated bindings to what you need:
-        .derive_default(true)
-        .derive_debug(true)
-        .generate_comments(true)
-        .generate()
-        .expect("bindgen failed");
-
-    // Write the bindings to $OUT_DIR/bindings.rs
-    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
-    bindings
-        .write_to_file(out_path.join("bindings.rs"))
-        .expect("failed to write bindings");
+    // system math lib
+    println!("cargo:rustc-link-lib=m");
 }
