@@ -11,3 +11,7 @@ cc = "1.2.36"
 lto = true        # Link-time optimization
 codegen-units = 1 # Slower build times, but more optimization
 opt-level = 3     # Highest optimization level
+
+[dependencies]
+libc = "0.2.175"
+sundials-sys = "0.6.2"

@@ -1,6 +1,6 @@
 fn main() {
     // Adjust this once if your SUNDIALS install moves
-    let sundials_prefix = "/Users/kmaitreys/Documents/software/cvode-7.4.0/install";
+    let sundials_prefix = "/Users/kmaitreys/Documents/software/sundials-7.4.0/install";
     let examples_dir = "/Users/kmaitreys/Documents/probe/sun-examples/examples";
 
     // Add all C example files here
